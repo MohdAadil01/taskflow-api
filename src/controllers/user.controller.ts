@@ -24,3 +24,18 @@ export const registerUser = async (req: Request, res: Response) => {
     console.log(e);
   }
 };
+
+export const loginUser = async (req: Request, res: Response) => {
+  const { email, password } = req.body;
+  const user = await User.findOne({ email });
+  if (!user) {
+    return res.status(404).json({
+      message: "user not found",
+    });
+  }
+  const isPasswordCorrect = await user.isPasswordCorrect(password);
+  if (!isPasswordCorrect) {
+    return res.status(401).json({ message: "Invalid credentials" });
+  }
+  return res.status(200).json({ message: "Login successful", user });
+};

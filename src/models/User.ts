@@ -1,11 +1,19 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
+import { comparePassword } from "../utils/brcypt";
 
-const userSchema = new mongoose.Schema({
+export interface IUser extends Document {
+  name: string;
+  email: string;
+  password: string;
+  isPasswordCorrect(password: string): Promise<boolean>;
+}
+
+const userSchema = new Schema<IUser>({
   name: {
     type: String,
     required: true,
     trim: true,
-    mingLength: 3,
+    minLength: 3,
     maxLength: 30,
   },
   email: {
@@ -23,6 +31,13 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-const User = mongoose.model("User", userSchema);
+// ✅ Use a normal function so `this` refers to the document
+userSchema.methods.isPasswordCorrect = async function (
+  password: string
+): Promise<boolean> {
+  return comparePassword(password, this.password);
+};
+
+const User = mongoose.model<IUser>("User", userSchema);
 
 export default User;
