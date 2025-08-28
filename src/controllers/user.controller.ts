@@ -1,41 +1,53 @@
 import { Request, Response } from "express";
+import jwt, { SignOptions } from "jsonwebtoken";
 import User from "../models/User";
 import { hashPassword } from "../utils/brcypt";
+import ApiError from "../utils/ApiError";
+import asyncHandler from "../utils/asyncHandler";
 
-export const registerUser = async (req: Request, res: Response) => {
-  try {
+// Register User
+export const registerUser = asyncHandler(
+  async (req: Request, res: Response) => {
     const { name, email, password } = req.body;
-    const user = await User.findOne({ email });
-    if (user) {
-      return res.status(400).json({
-        message: "Email already registered.",
-      });
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      throw new ApiError(400, "Email already registered");
     }
 
     const hashPass = await hashPassword(password);
-    const newUser = await User.create({ name, email, hashPass });
+
+    const newUser = await User.create({ name, email, password: hashPass });
 
     res.status(201).json({
       message: "User registered successfully",
       user: newUser,
     });
-  } catch (e) {
-    console.log("Error while registering user...");
-    console.log(e);
   }
-};
+);
 
-export const loginUser = async (req: Request, res: Response) => {
+export const loginUser = asyncHandler(async (req: Request, res: Response) => {
   const { email, password } = req.body;
+
   const user = await User.findOne({ email });
   if (!user) {
-    return res.status(404).json({
-      message: "user not found",
-    });
+    throw new ApiError(404, "User not found");
   }
+
   const isPasswordCorrect = await user.isPasswordCorrect(password);
   if (!isPasswordCorrect) {
-    return res.status(401).json({ message: "Invalid credentials" });
+    throw new ApiError(401, "Invalid credentials");
   }
-  return res.status(200).json({ message: "Login successful", user });
-};
+
+  const jwt_token = jwt.sign(
+    { id: user._id, email: user.email },
+    process.env.JWT_SECRET as string,
+    { expiresIn: process.env.JWT_EXPIRY || "7d" } as SignOptions
+  );
+
+  res.status(200).json({
+    message: "Login successful",
+    user,
+    jwt_token,
+  });
+});

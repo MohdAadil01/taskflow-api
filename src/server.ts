@@ -2,6 +2,7 @@ import express from "express";
 import { config } from "dotenv";
 import { connectDb } from "./config/db";
 import userRoute from "./routes/user.routes";
+import errorHandler from "./middleware/error.middleware";
 
 config();
 
@@ -14,6 +15,8 @@ app.use(express.json());
 })();
 
 app.use("/api/v1/users", userRoute);
+
+app.use(errorHandler);
 
 app.listen(process.env.SERVER_PORT, () => {
   console.log(process.env.SERVER_PORT);

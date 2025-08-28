@@ -1,15 +1,15 @@
 import bcrypt from "bcrypt";
 
-const saltRounds = process.env.SALT_ROUNDS;
+const saltRounds = Number(process.env.SALT_ROUNDS) || 10;
 
-export const hashPassword = async (password: string) => {
-  let hashPassword;
-  await bcrypt.hash(password, saltRounds || 5, (err, hash) => {
-    hashPassword = hash;
-  });
-  return hashPassword;
+export const hashPassword = async (password: string): Promise<string> => {
+  const hash = await bcrypt.hash(password, saltRounds);
+  return hash;
 };
 
-export const comparePassword = (candidate: string, hashed: string) => {
-  return bcrypt.compare(candidate, hashed);
+export const comparePassword = async (
+  candidate: string,
+  hashed: string
+): Promise<boolean> => {
+  return await bcrypt.compare(candidate, hashed);
 };

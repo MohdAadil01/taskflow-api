@@ -31,7 +31,6 @@ const userSchema = new Schema<IUser>({
   },
 });
 
-// ✅ Use a normal function so `this` refers to the document
 userSchema.methods.isPasswordCorrect = async function (
   password: string
 ): Promise<boolean> {
