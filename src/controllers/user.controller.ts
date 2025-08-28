@@ -3,10 +3,9 @@ import jwt, { SignOptions } from "jsonwebtoken";
 import User from "../models/User";
 import { hashPassword } from "../utils/brcypt";
 import ApiError from "../utils/ApiError";
-import asyncHandler from "../utils/asyncHandler";
+import AsyncHandler from "../utils/AsyncHandler";
 
-// Register User
-export const registerUser = asyncHandler(
+export const registerUser = AsyncHandler(
   async (req: Request, res: Response) => {
     const { name, email, password } = req.body;
 
@@ -17,19 +16,23 @@ export const registerUser = asyncHandler(
 
     const hashPass = await hashPassword(password);
 
-    const newUser = await User.create({ name, email, password: hashPass });
+    const newUser = await User.create({
+      name,
+      email,
+      password: hashPass,
+    });
 
     res.status(201).json({
       message: "User registered successfully",
-      user: newUser,
+      user: { name, email },
     });
   }
 );
 
-export const loginUser = asyncHandler(async (req: Request, res: Response) => {
+export const loginUser = AsyncHandler(async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email }).select("-password");
   if (!user) {
     throw new ApiError(404, "User not found");
   }
@@ -49,5 +52,21 @@ export const loginUser = asyncHandler(async (req: Request, res: Response) => {
     message: "Login successful",
     user,
     jwt_token,
+  });
+});
+
+export const getUserInfo = AsyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.user_data!;
+
+  const user = await User.findById(id).select("-password");
+
+  if (!user) {
+    throw new ApiError(404, "No user found");
+  }
+
+  return res.status(200).json({
+    success: true,
+    message: "User found",
+    user,
   });
 });
