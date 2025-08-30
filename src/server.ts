@@ -1,7 +1,8 @@
 import express from "express";
 import { config } from "dotenv";
 import { connectDb } from "./config/db";
-import userRoute from "./routes/user.routes";
+import userRoute from "./routes/user.route";
+import projectRoute from "./routes/project.route";
 import errorHandler from "./middleware/error.middleware";
 
 config();
@@ -15,6 +16,7 @@ app.use(express.json());
 })();
 
 app.use("/api/v1/users", userRoute);
+app.use("/api/v1/projects", projectRoute);
 
 app.use(errorHandler);
 

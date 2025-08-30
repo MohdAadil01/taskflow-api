@@ -32,9 +32,9 @@ const userSchema = new Schema<IUser>({
 });
 
 userSchema.methods.isPasswordCorrect = async function (
-  password: string
+  plain_password: string
 ): Promise<boolean> {
-  return comparePassword(password, this.password);
+  return comparePassword(plain_password, this.password);
 };
 
 const User = mongoose.model<IUser>("User", userSchema);

@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import jwt, { SignOptions } from "jsonwebtoken";
-import User from "../models/User";
+import User from "../models/user.model";
 import { hashPassword } from "../utils/brcypt";
 import ApiError from "../utils/ApiError";
 import AsyncHandler from "../utils/AsyncHandler";
@@ -32,7 +32,7 @@ export const registerUser = AsyncHandler(
 export const loginUser = AsyncHandler(async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
-  const user = await User.findOne({ email }).select("-password");
+  const user = await User.findOne({ email });
   if (!user) {
     throw new ApiError(404, "User not found");
   }
@@ -50,7 +50,6 @@ export const loginUser = AsyncHandler(async (req: Request, res: Response) => {
 
   res.status(200).json({
     message: "Login successful",
-    user,
     jwt_token,
   });
 });

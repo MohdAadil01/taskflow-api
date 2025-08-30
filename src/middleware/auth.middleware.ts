@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import AsyncHandler from "../utils/AsyncHandler";
 import ApiError from "../utils/ApiError";
-import User from "../models/User";
+import User from "../models/user.model";
 
 declare module "express-serve-static-core" {
   interface Request {
