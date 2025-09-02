@@ -1,5 +1,6 @@
 import express from "express";
 import { config } from "dotenv";
+import cors from "cors";
 import { connectDb } from "./config/db";
 import userRoute from "./routes/user.route";
 import projectRoute from "./routes/project.route";
@@ -10,6 +11,7 @@ config();
 
 const app = express();
 
+app.use(cors());
 app.use(express.json());
 
 (async () => {
